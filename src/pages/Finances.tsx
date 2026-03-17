@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Plus, Download, DollarSign, Clock, XCircle, MoreHorizontal, Loader2 } from 'lucide-react'
+import {
+  Plus,
+  Download,
+  DollarSign,
+  Clock,
+  XCircle,
+  MoreHorizontal,
+  Loader2,
+  Copy,
+} from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -39,6 +48,7 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
 import { TransactionFormModal } from '@/components/finances/TransactionFormModal'
+import { InstallmentFormModal } from '@/components/finances/InstallmentFormModal'
 
 export default function Finances() {
   const { toast } = useToast()
@@ -48,13 +58,16 @@ export default function Finances() {
   const [kpis, setKpis] = useState({ paid: 0, pending: 0, cancelled: 0 })
   const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isInstallmentFormOpen, setIsInstallmentFormOpen] = useState(false)
 
   const fetchFinances = async () => {
     setLoading(true)
     const { data } = await supabase
       .from('transactions')
       .select('*, students(name), classes(name)')
+      .order('due_date', { ascending: false })
       .order('created_at', { ascending: false })
+
     if (data) {
       const parsedInvoices = data.map((t: any) => ({
         rawId: t.id,
@@ -117,7 +130,14 @@ export default function Finances() {
   }, [])
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from('transactions').update({ status }).eq('id', id)
+    const payload: any = { status }
+    if (status === 'Pago') {
+      payload.payment_date = new Date().toISOString().split('T')[0]
+    } else {
+      payload.payment_date = null
+    }
+
+    const { error } = await supabase.from('transactions').update(payload).eq('id', id)
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' })
     else {
       toast({ title: 'Sucesso', description: `Status alterado para ${status}.` })
@@ -172,9 +192,21 @@ export default function Finances() {
           <Button variant="outline" className="flex-1 sm:flex-none shadow-sm bg-background">
             <Download className="mr-2 h-4 w-4" /> Relatório
           </Button>
-          <Button onClick={() => setIsFormOpen(true)} className="flex-1 sm:flex-none shadow-sm">
-            <Plus className="mr-2 h-4 w-4" /> Nova Transação
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="flex-1 sm:flex-none shadow-sm">
+                <Plus className="mr-2 h-4 w-4" /> Novo Registro
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsFormOpen(true)}>
+                <DollarSign className="mr-2 h-4 w-4" /> Transação Única
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsInstallmentFormOpen(true)}>
+                <Copy className="mr-2 h-4 w-4" /> Gerar Parcelamento
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -246,7 +278,7 @@ export default function Finances() {
 
         <Card className="lg:col-span-2">
           <CardHeader className="border-b border-border/50 bg-muted/10 rounded-t-xl pb-5">
-            <CardTitle>Últimas Transações</CardTitle>
+            <CardTitle>Últimas Transações e Parcelas</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto max-h-[300px]">
@@ -255,7 +287,7 @@ export default function Finances() {
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="pl-6">Aluno</TableHead>
                     <TableHead>Método</TableHead>
-                    <TableHead>Data</TableHead>
+                    <TableHead>Vencimento</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right pr-6">Ações</TableHead>
@@ -271,7 +303,7 @@ export default function Finances() {
                   ) : invoices.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        Nenhuma fatura encontrada.
+                        Nenhuma transação encontrada.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -409,6 +441,11 @@ export default function Finances() {
       <TransactionFormModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
+        onSuccess={fetchFinances}
+      />
+      <InstallmentFormModal
+        isOpen={isInstallmentFormOpen}
+        onClose={() => setIsInstallmentFormOpen(false)}
         onSuccess={fetchFinances}
       />
     </div>

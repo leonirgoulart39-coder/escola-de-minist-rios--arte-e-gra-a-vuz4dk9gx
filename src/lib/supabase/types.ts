@@ -82,6 +82,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          role: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -89,6 +90,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          role?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -96,6 +98,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          role?: string | null
         }
         Relationships: []
       }
@@ -352,6 +355,7 @@ export const Constants = {
 //   avatar_url: text (nullable)
 //   created_at: timestamp with time zone (nullable, default: now())
 //   email: text (nullable)
+//   role: text (nullable, default: 'user'::text)
 // Table: students
 //   id: uuid (not null, default: gen_random_uuid())
 //   name: text (not null)
