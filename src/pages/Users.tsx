@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase/client'
 
 interface Profile {
@@ -19,6 +20,7 @@ interface Profile {
   email: string | null
   avatar_url: string | null
   created_at: string
+  role?: string
 }
 
 export default function Users() {
@@ -84,13 +86,14 @@ export default function Users() {
                 <TableHead className="w-[80px] pl-6">Avatar</TableHead>
                 <TableHead>Nome Completo</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Função</TableHead>
                 <TableHead className="text-right pr-6">Data de Cadastro</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                     Carregando usuários...
                   </TableCell>
                 </TableRow>
@@ -114,6 +117,11 @@ export default function Users() {
                     <TableCell className="text-muted-foreground">
                       {user.email || 'Email não disponível'}
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                        {user.role === 'admin' ? 'Administrador' : 'Usuário'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right pr-6 font-medium text-muted-foreground">
                       {new Date(user.created_at).toLocaleDateString('pt-BR', {
                         day: '2-digit',
@@ -125,7 +133,7 @@ export default function Users() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                     Nenhum usuário encontrado.
                   </TableCell>
                 </TableRow>
