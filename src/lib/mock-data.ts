@@ -42,28 +42,28 @@ export const MOCK_COURSES = [
     name: 'Pintura a Óleo',
     instructor: 'Prof. Roberto',
     students: 12,
-    color: 'bg-blue-100 text-blue-700',
+    color: 'bg-primary/10 text-primary',
   },
   {
     id: '2',
     name: 'Arte Digital',
     instructor: 'Profa. Julia',
     students: 25,
-    color: 'bg-purple-100 text-purple-700',
+    color: 'bg-emerald-100 text-emerald-800',
   },
   {
     id: '3',
     name: 'Escultura',
     instructor: 'Prof. Marcos',
     students: 8,
-    color: 'bg-amber-100 text-amber-700',
+    color: 'bg-teal-100 text-teal-800',
   },
   {
     id: '4',
     name: 'Aquarela',
     instructor: 'Profa. Sofia',
     students: 15,
-    color: 'bg-emerald-100 text-emerald-700',
+    color: 'bg-secondary text-secondary-foreground',
   },
 ]
 
@@ -135,7 +135,7 @@ export const MOCK_INVOICES = [
 
 export const MOCK_CASH_FLOW_BY_CLASS = [
   { class: 'Pintura', paid: 4500, pending: 1200, cancelled: 300 },
-  { class: 'Arte Digital', paid: 6200, pending: 800, cancelled: 0 },
+  { class: 'Digital', paid: 6200, pending: 800, cancelled: 0 },
   { class: 'Escultura', paid: 2100, pending: 2100, cancelled: 700 },
   { class: 'Aquarela', paid: 3800, pending: 500, cancelled: 150 },
 ]

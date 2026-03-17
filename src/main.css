@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,50 +6,57 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    /* Very light gray background for a clean, breathable layout */
+    --background: 210 20% 98%;
+    /* High contrast dark gray for text */
     --foreground: 222.2 84% 4.9%;
 
+    /* Crisp white cards */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Indigo-500 Primary */
-    --primary: 239 84% 67%;
-    --primary-foreground: 210 40% 98%;
+    /* Reference Primary Green: #1a512e */
+    --primary: 142 51% 21%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Subtle green-tinted secondary */
+    --secondary: 142 15% 94%;
+    --secondary-foreground: 142 51% 21%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 210 20% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* Rose-400 Accent */
-    --accent: 346 87% 66%;
-    --accent-foreground: 210 40% 98%;
+    /* Brighter green for accents */
+    --accent: 142 30% 90%;
+    --accent-foreground: 142 51% 21%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 239 84% 67%;
+    --ring: 142 51% 21%;
 
-    --radius: 0.75rem;
+    /* Softer, more modern border radius */
+    --radius: 0.5rem;
 
+    /* Clean white sidebar with green active states */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary: 142 51% 21%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 222.2 84% 4.9%;
+    --sidebar-accent: 142 30% 94%;
+    --sidebar-accent-foreground: 142 51% 21%;
     --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 239 84% 67%;
+    --sidebar-ring: 142 51% 21%;
 
-    --chart-1: 239 84% 67%;
-    --chart-2: 346 87% 66%;
-    --chart-3: 142 71% 45%;
+    /* Harmonious chart colors (greens, teals, warm accents) */
+    --chart-1: 142 51% 21%;
+    --chart-2: 152 60% 35%;
+    --chart-3: 175 40% 45%;
     --chart-4: 45 93% 47%;
     --chart-5: 199 89% 48%;
   }
@@ -64,8 +71,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 239 84% 67%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 142 51% 40%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -73,30 +80,34 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 346 87% 66%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 142 30% 15%;
+    --accent-foreground: 142 51% 60%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 239 84% 67%;
+    --ring: 142 51% 40%;
 
     --sidebar-background: 222.2 84% 4.9%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary: 142 51% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-accent: 142 30% 15%;
+    --sidebar-accent-foreground: 142 51% 60%;
     --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 239 84% 67%;
+    --sidebar-ring: 142 51% 40%;
 
-    --chart-1: 239 84% 67%;
-    --chart-2: 346 87% 66%;
-    --chart-3: 142 71% 45%;
-    --chart-4: 45 93% 47%;
-    --chart-5: 199 89% 48%;
+    --chart-1: 142 51% 40%;
+    --chart-2: 152 60% 45%;
+    --chart-3: 175 40% 55%;
+    --chart-4: 45 93% 57%;
+    --chart-5: 199 89% 58%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
   }
 
   section[aria-label='Notifications alt+T'] {
@@ -136,12 +147,12 @@
   }
 
   .animate-fade-in {
-    animation: fade-in 0.4s ease-out;
+    animation: fade-in 0.4s ease-out forwards;
   }
   .animate-slide-in {
-    animation: slide-in 0.4s ease-out;
+    animation: slide-in 0.4s ease-out forwards;
   }
   .animate-slide-up {
-    animation: slide-up 0.4s ease-out;
+    animation: slide-up 0.4s ease-out forwards;
   }
 }

@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -36,26 +35,31 @@ function AppSidebar() {
   const location = useLocation()
 
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Palette className="size-4" />
+    <Sidebar variant="inset" className="border-r border-border/40">
+      <SidebarHeader className="p-5">
+        <div className="flex items-center gap-3 px-1">
+          <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <Palette className="size-5" />
           </div>
-          <span className="font-serif font-bold text-xl tracking-tight text-sidebar-foreground">
-            ArtesFlow
+          <span className="font-bold text-xl tracking-tight text-sidebar-foreground">
+            Sintonia Arte
           </span>
         </div>
       </SidebarHeader>
-      <SidebarContent className="p-2">
+      <SidebarContent className="p-3">
         <SidebarMenu>
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.url
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.title}
+                  className="py-2.5 font-medium transition-all"
+                >
                   <Link to={item.url}>
-                    <item.icon />
+                    <item.icon className="size-4.5" />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
@@ -72,7 +76,7 @@ function TopHeader() {
   const { toggleSidebar, isMobile } = useSidebar()
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-10 flex h-[4.5rem] shrink-0 items-center gap-4 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8">
       {isMobile && (
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
           <Menu className="size-5" />
@@ -80,26 +84,31 @@ function TopHeader() {
         </Button>
       )}
       <div className="flex flex-1 items-center gap-4 md:gap-8">
-        <div className="relative w-full max-w-sm ml-auto md:ml-0 hidden sm:block">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="relative w-full max-w-md ml-auto md:ml-0 hidden sm:block">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Buscar alunos..."
-            className="w-full rounded-lg bg-background pl-8 md:w-[300px]"
+            placeholder="Buscar alunos ou turmas..."
+            className="w-full rounded-full bg-muted/50 border-transparent focus-visible:bg-background pl-10 md:w-[320px] transition-colors"
           />
         </div>
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="outline" size="icon" className="relative rounded-full">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-accent"></span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative rounded-full text-muted-foreground hover:text-foreground"
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-primary ring-2 ring-background"></span>
             <span className="sr-only">Notificações</span>
           </Button>
-          <Avatar className="h-9 w-9 border border-border">
+          <div className="h-8 w-px bg-border/50 hidden sm:block"></div>
+          <Avatar className="h-9 w-9 border border-border/50 ring-2 ring-transparent transition-all hover:ring-primary/20 cursor-pointer">
             <AvatarImage
               src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=10"
               alt="@admin"
             />
-            <AvatarFallback>AD</AvatarFallback>
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">AD</AvatarFallback>
           </Avatar>
         </div>
       </div>
@@ -111,10 +120,12 @@ export default function Layout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <div className="flex flex-col flex-1 min-w-0 bg-background/50">
+      <div className="flex flex-col flex-1 min-w-0 bg-muted/20">
         <TopHeader />
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 animate-fade-in">
-          <Outlet />
+        <main className="flex-1 overflow-auto p-4 md:p-8 animate-fade-in">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
         </main>
       </div>
     </SidebarProvider>
