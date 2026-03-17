@@ -9,7 +9,6 @@ import Index from './pages/Index'
 import Students from './pages/Students'
 import Classes from './pages/Classes'
 import Finances from './pages/Finances'
-import Gallery from './pages/Gallery'
 
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
@@ -22,7 +21,6 @@ const App = () => (
           <Route path="/alunos" element={<Students />} />
           <Route path="/turmas" element={<Classes />} />
           <Route path="/financeiro" element={<Finances />} />
-          <Route path="/galeria" element={<Gallery />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

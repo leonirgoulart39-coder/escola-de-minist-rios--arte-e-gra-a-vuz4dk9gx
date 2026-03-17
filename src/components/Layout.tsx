@@ -1,14 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import {
-  Bell,
-  Search,
-  LayoutDashboard,
-  Users,
-  Palette,
-  Wallet,
-  Image as ImageIcon,
-  Menu,
-} from 'lucide-react'
+import { Bell, Search, LayoutDashboard, Users, Palette, Wallet, Menu } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -28,7 +19,6 @@ const NAV_ITEMS = [
   { title: 'Alunos', url: '/alunos', icon: Users },
   { title: 'Turmas & Cursos', url: '/turmas', icon: Palette },
   { title: 'Financeiro', url: '/financeiro', icon: Wallet },
-  { title: 'Galeria de Arte', url: '/galeria', icon: ImageIcon },
 ]
 
 function AppSidebar() {
