@@ -1,157 +1,188 @@
-import { Link, Outlet, useLocation } from 'react-router-dom'
-import {
-  Bell,
-  Search,
-  LayoutDashboard,
-  Users,
-  Palette,
-  Wallet,
-  Menu,
-  LogOut,
-  UserCog,
-  ChevronDown,
-} from 'lucide-react'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-  useSidebar,
-} from '@/components/ui/sidebar'
-import { Input } from '@/components/ui/input'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useAuth } from '@/hooks/use-auth'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  User,
+  Users,
+  GraduationCap,
+  CalendarDays,
+} from 'lucide-react'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
+import logoImg from '@/assets/logo-ibms-02077.jpg'
 
-const NAV_ITEMS = [
-  { title: 'Painel Geral', url: '/', icon: LayoutDashboard },
-  { title: 'Alunos', url: '/alunos', icon: Users },
-  { title: 'Turmas & Cursos', url: '/turmas', icon: Palette },
-  { title: 'Financeiro', url: '/financeiro', icon: Wallet },
-  { title: 'Usuários', url: '/usuarios', icon: UserCog },
-]
-
-function AppSidebar() {
+export function Layout() {
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
   const location = useLocation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login')
+  }
+
+  const navItems = [
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Alunos', href: '/students', icon: GraduationCap },
+    { name: 'Professores', href: '/teachers', icon: Users },
+    { name: 'Aulas', href: '/classes', icon: CalendarDays },
+  ]
+
+  const userInitials = user?.email ? user.email.substring(0, 2).toUpperCase() : 'AG'
 
   return (
-    <Sidebar variant="inset" className="border-r border-border/40">
-      <SidebarHeader className="p-6">
-        <div className="flex items-center justify-center w-full overflow-hidden">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="h-10 w-auto object-contain transition-all group-data-[collapsible=icon]:h-6 drop-shadow-sm"
-            onError={(e) => {
-              e.currentTarget.src =
-                'https://img.usecurling.com/i?q=brand&shape=fill&color=solid-black'
-            }}
-          />
-        </div>
-      </SidebarHeader>
-      <SidebarContent className="p-3">
-        <SidebarMenu>
-          {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname === item.url
-            return (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive}
-                  tooltip={item.title}
-                  className="py-2.5 font-medium transition-all"
-                >
-                  <Link to={item.url}>
-                    <item.icon className="size-4.5" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          })}
-        </SidebarMenu>
-      </SidebarContent>
-    </Sidebar>
-  )
-}
-
-function TopHeader() {
-  const { toggleSidebar, isMobile } = useSidebar()
-  const { signOut, user } = useAuth()
-
-  return (
-    <header className="sticky top-0 z-10 flex h-[4.5rem] shrink-0 items-center gap-4 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8">
-      {isMobile && (
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
-          <Menu className="size-5" />
-          <span className="sr-only">Toggle menu</span>
-        </Button>
-      )}
-      <div className="flex flex-1 items-center gap-4 md:gap-8">
-        <div className="relative w-full max-w-md ml-auto md:ml-0 hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar alunos ou turmas..."
-            className="w-full rounded-full bg-muted/50 border-transparent focus-visible:bg-background pl-10 md:w-[320px] transition-colors"
-          />
-        </div>
-        <div className="ml-auto flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative rounded-full text-muted-foreground hover:text-foreground"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-primary ring-2 ring-background"></span>
-            <span className="sr-only">Notificações</span>
-          </Button>
-          <div className="h-8 w-px bg-border/50 hidden sm:block"></div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center px-4 md:px-8">
+          {/* Mobile Menu */}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative flex items-center gap-2 rounded-full pl-3 pr-2 py-1.5 h-10 border border-border/50 hover:bg-muted/60 transition-colors"
+                className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
               >
-                <span className="font-medium text-sm max-w-[140px] truncate text-foreground/80">
-                  {user?.user_metadata?.full_name || 'Administrador'}
-                </span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle Menu</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 mt-1">
-              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer py-2">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetTrigger>
+            <SheetContent side="left" className="pr-0">
+              <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+              <MobileLink
+                href="/"
+                className="flex items-center gap-2 mb-8"
+                onOpenChange={setIsMobileMenuOpen}
+              >
+                <img src={logoImg} alt="Arte e Graça" className="h-8 w-8 rounded-md object-cover" />
+                <span className="font-bold">Arte e Graça</span>
+              </MobileLink>
+              <div className="flex flex-col gap-3">
+                {navItems.map((item) => (
+                  <MobileLink
+                    key={item.href}
+                    href={item.href}
+                    onOpenChange={setIsMobileMenuOpen}
+                    className={cn(
+                      'flex items-center gap-2 text-muted-foreground',
+                      location.pathname === item.href && 'text-foreground font-medium',
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </MobileLink>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Desktop Nav */}
+          <div className="mr-4 hidden md:flex w-full justify-between">
+            <div className="flex items-center gap-6 md:gap-8">
+              <Link to="/" className="flex items-center gap-2 mr-4">
+                <img src={logoImg} alt="Arte e Graça" className="h-8 w-8 rounded-md object-cover" />
+                <span className="hidden font-bold sm:inline-block">Arte e Graça</span>
+              </Link>
+              <nav className="flex items-center gap-6 text-sm font-medium">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      'transition-colors hover:text-foreground/80',
+                      location.pathname === item.href ? 'text-foreground' : 'text-foreground/60',
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+
+          {/* User Menu */}
+          <div className="flex flex-1 items-center justify-end space-x-2">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                    <Avatar className="h-9 w-9 border border-border">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">Minha Conta</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sair</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" asChild>
+                  <Link to="/login">Entrar</Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <main className="flex-1">
+        <Outlet />
+      </main>
+    </div>
   )
 }
 
-export default function Layout() {
+interface MobileLinkProps extends React.PropsWithChildren {
+  href: string
+  onOpenChange?: (open: boolean) => void
+  className?: string
+}
+
+function MobileLink({ href, onOpenChange, className, children }: MobileLinkProps) {
+  const navigate = useNavigate()
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <div className="flex flex-col flex-1 min-w-0 bg-muted/20">
-        <TopHeader />
-        <main className="flex-1 overflow-auto p-4 md:p-8 animate-fade-in">
-          <div className="mx-auto max-w-7xl">
-            <Outlet />
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+    <Link
+      to={href}
+      onClick={() => {
+        navigate(href)
+        onOpenChange?.(false)
+      }}
+      className={cn(className)}
+    >
+      {children}
+    </Link>
   )
 }
