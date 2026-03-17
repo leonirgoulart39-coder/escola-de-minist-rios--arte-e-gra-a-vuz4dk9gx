@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Palette, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,8 +9,9 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
 export default function Login() {
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, session } = useAuth()
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const [isSignUp, setIsSignUp] = useState(false)
   const [name, setName] = useState('')
@@ -18,8 +20,23 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    if (session) {
+      navigate('/', { replace: true })
+    }
+  }, [session, navigate])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!email || !password) {
+      toast({
+        title: 'Erro de validação',
+        description: 'Por favor, preencha todos os campos.',
+        variant: 'destructive',
+      })
+      return
+    }
 
     if (isSignUp && password !== confirmPassword) {
       toast({
@@ -51,11 +68,17 @@ export default function Login() {
     } else {
       const { error } = await signIn(email, password)
       if (error) {
+        let msg = error.message
+        if (msg.includes('Invalid login credentials')) {
+          msg = 'Email ou senha inválidos.'
+        }
         toast({
           title: 'Erro no login',
-          description: error.message,
+          description: msg,
           variant: 'destructive',
         })
+      } else {
+        navigate('/', { replace: true })
       }
     }
 
