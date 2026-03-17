@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Plus, Download, DollarSign, Clock, XCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -29,34 +30,95 @@ import {
   CartesianGrid,
 } from 'recharts'
 import { useToast } from '@/hooks/use-toast'
-import { MOCK_FINANCES_PIE, MOCK_INVOICES, MOCK_CASH_FLOW_BY_CLASS } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase/client'
 
 export default function Finances() {
   const { toast } = useToast()
+  const [invoices, setInvoices] = useState<any[]>([])
+  const [cashFlow, setCashFlow] = useState<any[]>([])
+  const [pieData, setPieData] = useState<any[]>([])
+  const [kpis, setKpis] = useState({ paid: 0, pending: 0, cancelled: 0 })
 
-  const totalPaid = MOCK_CASH_FLOW_BY_CLASS.reduce((acc, curr) => acc + curr.paid, 0)
-  const totalPending = MOCK_CASH_FLOW_BY_CLASS.reduce((acc, curr) => acc + curr.pending, 0)
-  const totalCancelled = MOCK_CASH_FLOW_BY_CLASS.reduce((acc, curr) => acc + curr.cancelled, 0)
+  useEffect(() => {
+    async function fetchFinances() {
+      const { data } = (await supabase
+        .from('transactions' as any)
+        .select('*, students(name), classes(name)')
+        .order('created_at', { ascending: false })) as any
 
-  const KPIS = [
+      if (data) {
+        const parsedInvoices = data.map((t: any) => ({
+          id: t.id.substring(0, 8),
+          student: t.students?.name || 'Desconhecido',
+          className: t.classes?.name || 'Outros',
+          amount: Number(t.amount),
+          status: t.status,
+          paymentMethod: t.payment_method || 'N/A',
+          date: new Date(t.due_date || t.created_at).toLocaleDateString('pt-BR'),
+        }))
+        setInvoices(parsedInvoices)
+
+        const totals = { paid: 0, pending: 0, cancelled: 0 }
+        const classFlowMap: Record<string, any> = {}
+        const courseIncomeMap: Record<string, number> = {}
+
+        parsedInvoices.forEach((inv: any) => {
+          if (inv.status === 'Pago') totals.paid += inv.amount
+          if (inv.status === 'Pendente') totals.pending += inv.amount
+          if (inv.status === 'Cancelado') totals.cancelled += inv.amount
+
+          const cName = inv.className
+          if (!classFlowMap[cName])
+            classFlowMap[cName] = { class: cName, paid: 0, pending: 0, cancelled: 0 }
+
+          if (inv.status === 'Pago') {
+            classFlowMap[cName].paid += inv.amount
+            courseIncomeMap[cName] = (courseIncomeMap[cName] || 0) + inv.amount
+          }
+          if (inv.status === 'Pendente') classFlowMap[cName].pending += inv.amount
+          if (inv.status === 'Cancelado') classFlowMap[cName].cancelled += inv.amount
+        })
+
+        setKpis(totals)
+        setCashFlow(Object.values(classFlowMap))
+
+        const colors = [
+          'var(--color-course1)',
+          'var(--color-course2)',
+          'var(--color-course3)',
+          'var(--color-course4)',
+        ]
+        setPieData(
+          Object.entries(courseIncomeMap).map(([course, value], idx) => ({
+            course,
+            value,
+            fill: colors[idx % colors.length],
+          })),
+        )
+      }
+    }
+    fetchFinances()
+  }, [])
+
+  const KPI_DATA = [
     {
       title: 'Pagas',
-      value: totalPaid,
+      value: kpis.paid,
       icon: DollarSign,
       color: 'text-primary',
       bg: 'bg-primary/10',
     },
     {
       title: 'Pendentes',
-      value: totalPending,
+      value: kpis.pending,
       icon: Clock,
       color: 'text-amber-600',
       bg: 'bg-amber-100',
     },
     {
       title: 'Canceladas',
-      value: totalCancelled,
+      value: kpis.cancelled,
       icon: XCircle,
       color: 'text-rose-600',
       bg: 'bg-rose-100',
@@ -77,9 +139,7 @@ export default function Finances() {
             <Download className="mr-2 h-4 w-4" /> Relatório
           </Button>
           <Button
-            onClick={() =>
-              toast({ title: 'Fatura Gerada', description: 'Enviada ao aluno com sucesso.' })
-            }
+            onClick={() => toast({ title: 'Fatura Gerada', description: 'Enviada com sucesso.' })}
             className="flex-1 sm:flex-none shadow-sm"
           >
             <Plus className="mr-2 h-4 w-4" /> Nova Fatura
@@ -88,7 +148,7 @@ export default function Finances() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {KPIS.map((kpi, i) => (
+        {KPI_DATA.map((kpi, i) => (
           <Card key={i} className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -115,17 +175,17 @@ export default function Finances() {
           <CardContent>
             <ChartContainer
               config={{
-                course1: { label: 'Pintura a Óleo', color: 'hsl(var(--chart-1))' },
-                course2: { label: 'Arte Digital', color: 'hsl(var(--chart-2))' },
-                course3: { label: 'Escultura', color: 'hsl(var(--chart-3))' },
-                course4: { label: 'Aquarela', color: 'hsl(var(--chart-4))' },
+                course1: { label: 'Curso 1', color: 'hsl(var(--chart-1))' },
+                course2: { label: 'Curso 2', color: 'hsl(var(--chart-2))' },
+                course3: { label: 'Curso 3', color: 'hsl(var(--chart-3))' },
+                course4: { label: 'Curso 4', color: 'hsl(var(--chart-4))' },
               }}
               className="h-[250px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={MOCK_FINANCES_PIE}
+                    data={pieData}
                     cx="50%"
                     cy="50%"
                     innerRadius={65}
@@ -133,8 +193,9 @@ export default function Finances() {
                     paddingAngle={3}
                     dataKey="value"
                     stroke="none"
+                    nameKey="course"
                   >
-                    {MOCK_FINANCES_PIE.map((entry, index) => (
+                    {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
@@ -151,7 +212,7 @@ export default function Finances() {
             <CardTitle>Últimas Faturas</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[300px]">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
@@ -163,7 +224,7 @@ export default function Finances() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {MOCK_INVOICES.map((invoice) => (
+                  {invoices.map((invoice) => (
                     <TableRow key={invoice.id} className="hover:bg-muted/30">
                       <TableCell className="font-semibold pl-6">{invoice.student}</TableCell>
                       <TableCell>
@@ -188,6 +249,13 @@ export default function Finances() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {invoices.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        Nenhuma fatura encontrada.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -199,7 +267,7 @@ export default function Finances() {
         <CardHeader>
           <CardTitle>Fluxo de Caixa por Turma</CardTitle>
           <CardDescription>
-            Valores mensais de parcelas pagas, pendentes e canceladas.
+            Valores totais de parcelas pagas, pendentes e canceladas por curso.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -213,7 +281,7 @@ export default function Finances() {
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={MOCK_CASH_FLOW_BY_CLASS}
+                data={cashFlow}
                 margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
                 barSize={32}
               >

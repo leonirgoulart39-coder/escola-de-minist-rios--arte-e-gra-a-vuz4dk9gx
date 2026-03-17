@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus, MoreHorizontal, User, Mail, Phone, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,11 +27,31 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useToast } from '@/hooks/use-toast'
-import { MOCK_STUDENTS } from '@/lib/mock-data'
+import { supabase } from '@/lib/supabase/client'
 
 export default function Students() {
   const { toast } = useToast()
-  const [selectedStudent, setSelectedStudent] = useState<(typeof MOCK_STUDENTS)[0] | null>(null)
+  const [students, setStudents] = useState<any[]>([])
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null)
+
+  useEffect(() => {
+    async function fetchStudents() {
+      const { data } = (await supabase
+        .from('students' as any)
+        .select('*, enrollments(classes(name))')
+        .order('created_at', { ascending: false })) as any
+
+      if (data) {
+        setStudents(
+          data.map((s: any) => ({
+            ...s,
+            course: s.enrollments?.[0]?.classes?.name || 'Sem curso associado',
+          })),
+        )
+      }
+    }
+    fetchStudents()
+  }, [])
 
   const handleAddStudent = () => {
     toast({
@@ -73,11 +93,11 @@ export default function Students() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MOCK_STUDENTS.map((student) => (
+              {students.map((student) => (
                 <TableRow key={student.id} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="pl-6">
                     <Avatar className="h-10 w-10 border border-border/50">
-                      <AvatarImage src={student.avatar} alt={student.name} />
+                      <AvatarImage src={student.avatar_url} alt={student.name} />
                       <AvatarFallback className="bg-primary/10 text-primary font-medium">
                         {student.name.substring(0, 2)}
                       </AvatarFallback>
@@ -115,21 +135,17 @@ export default function Students() {
                               Ver Perfil
                             </DropdownMenuItem>
                           </DialogTrigger>
-                          <DropdownMenuItem className="cursor-pointer">Editar</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive">
-                            Desativar
-                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
 
-                      {selectedStudent && (
+                      {selectedStudent && selectedStudent.id === student.id && (
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
                             <DialogTitle className="text-xl">Perfil do Aluno</DialogTitle>
                           </DialogHeader>
                           <div className="flex flex-col items-center gap-5 py-6">
                             <Avatar className="h-28 w-28 border-4 border-background shadow-lg ring-1 ring-border/20">
-                              <AvatarImage src={selectedStudent.avatar} />
+                              <AvatarImage src={selectedStudent.avatar_url} />
                               <AvatarFallback className="text-2xl font-medium bg-primary/10 text-primary">
                                 {selectedStudent.name.substring(0, 2)}
                               </AvatarFallback>
@@ -148,21 +164,15 @@ export default function Students() {
                                   <Mail className="h-4 w-4 text-primary" />
                                 </div>
                                 <span className="font-medium text-foreground">
-                                  {selectedStudent.name.toLowerCase().replace(' ', '.')}@email.com
+                                  {selectedStudent.email || 'Sem email'}
                                 </span>
                               </div>
                               <div className="flex items-center gap-3 text-sm">
                                 <div className="p-2 bg-background rounded-md shadow-sm border border-border/40">
                                   <Phone className="h-4 w-4 text-primary" />
                                 </div>
-                                <span className="font-medium text-foreground">(11) 98765-4321</span>
-                              </div>
-                              <div className="flex items-center gap-3 text-sm">
-                                <div className="p-2 bg-background rounded-md shadow-sm border border-border/40">
-                                  <User className="h-4 w-4 text-primary" />
-                                </div>
                                 <span className="font-medium text-foreground">
-                                  Matriculado desde Jan/2023
+                                  {selectedStudent.phone || 'Sem telefone'}
                                 </span>
                               </div>
                             </div>
@@ -173,6 +183,13 @@ export default function Students() {
                   </TableCell>
                 </TableRow>
               ))}
+              {students.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    Nenhum aluno encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

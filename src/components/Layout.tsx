@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Bell, Search, LayoutDashboard, Users, Palette, Wallet, Menu } from 'lucide-react'
+import { Bell, Search, LayoutDashboard, Users, Palette, Wallet, Menu, LogOut } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +13,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useAuth } from '@/hooks/use-auth'
 
 const NAV_ITEMS = [
   { title: 'Painel Geral', url: '/', icon: LayoutDashboard },
@@ -64,6 +71,7 @@ function AppSidebar() {
 
 function TopHeader() {
   const { toggleSidebar, isMobile } = useSidebar()
+  const { signOut } = useAuth()
 
   return (
     <header className="sticky top-0 z-10 flex h-[4.5rem] shrink-0 items-center gap-4 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8">
@@ -93,13 +101,25 @@ function TopHeader() {
             <span className="sr-only">Notificações</span>
           </Button>
           <div className="h-8 w-px bg-border/50 hidden sm:block"></div>
-          <Avatar className="h-9 w-9 border border-border/50 ring-2 ring-transparent transition-all hover:ring-primary/20 cursor-pointer">
-            <AvatarImage
-              src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=10"
-              alt="@admin"
-            />
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">AD</AvatarFallback>
-          </Avatar>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="h-9 w-9 border border-border/50 ring-2 ring-transparent transition-all hover:ring-primary/20 cursor-pointer">
+                <AvatarImage
+                  src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=10"
+                  alt="@admin"
+                />
+                <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                  AD
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

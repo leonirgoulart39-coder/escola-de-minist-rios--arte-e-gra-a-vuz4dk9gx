@@ -1,45 +1,136 @@
+import { useEffect, useState } from 'react'
 import { Users, GraduationCap, DollarSign, UserPlus, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, Legend } from 'recharts'
-import { MOCK_FINANCES_CHART, MOCK_CLASSES_TODAY } from '@/lib/mock-data'
-
-const STATS = [
-  {
-    title: 'Total de Alunos',
-    value: '142',
-    icon: Users,
-    trend: '+4% este mês',
-    color: 'text-primary',
-    bg: 'bg-primary/10',
-  },
-  {
-    title: 'Aulas Hoje',
-    value: '8',
-    icon: GraduationCap,
-    trend: '2 a iniciar',
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-100',
-  },
-  {
-    title: 'Receita Mensal',
-    value: 'R$ 17.200',
-    icon: DollarSign,
-    trend: '+12% vs mês anterior',
-    color: 'text-teal-600',
-    bg: 'bg-teal-100',
-  },
-  {
-    title: 'Novas Matrículas',
-    value: '12',
-    icon: UserPlus,
-    trend: '+2 esta semana',
-    color: 'text-primary',
-    bg: 'bg-primary/10',
-  },
-]
+import { supabase } from '@/lib/supabase/client'
 
 export default function Index() {
+  const [stats, setStats] = useState([
+    {
+      title: 'Total de Alunos',
+      value: '0',
+      icon: Users,
+      trend: '',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+    },
+    {
+      title: 'Aulas Hoje',
+      value: '0',
+      icon: GraduationCap,
+      trend: '',
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-100',
+    },
+    {
+      title: 'Receita',
+      value: 'R$ 0',
+      icon: DollarSign,
+      trend: '',
+      color: 'text-teal-600',
+      bg: 'bg-teal-100',
+    },
+    {
+      title: 'Matrículas',
+      value: '0',
+      icon: UserPlus,
+      trend: '',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+    },
+  ])
+  const [financesChart, setFinancesChart] = useState<any[]>([])
+  const [classesToday, setClassesToday] = useState<any[]>([])
+
+  useEffect(() => {
+    async function fetchData() {
+      const [
+        { count: studentCount },
+        { data: classesData },
+        { data: transactionsData },
+        { count: enrollmentsCount },
+      ] = await Promise.all([
+        supabase
+          .from('students' as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Ativo') as any,
+        supabase.from('classes' as any).select('*, enrollments(count)') as any,
+        supabase.from('transactions' as any).select('*') as any,
+        supabase.from('enrollments' as any).select('*', { count: 'exact', head: true }) as any,
+      ])
+
+      const totalRevenue = (transactionsData || [])
+        .filter((t: any) => t.type === 'income' && t.status === 'Pago')
+        .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+
+      setStats([
+        {
+          title: 'Total de Alunos',
+          value: String(studentCount || 0),
+          icon: Users,
+          trend: 'Ativos',
+          color: 'text-primary',
+          bg: 'bg-primary/10',
+        },
+        {
+          title: 'Aulas Ativas',
+          value: String(classesData?.length || 0),
+          icon: GraduationCap,
+          trend: 'Neste semestre',
+          color: 'text-emerald-600',
+          bg: 'bg-emerald-100',
+        },
+        {
+          title: 'Receita Total',
+          value: `R$ ${totalRevenue.toLocaleString('pt-BR')}`,
+          icon: DollarSign,
+          trend: 'Acumulado',
+          color: 'text-teal-600',
+          bg: 'bg-teal-100',
+        },
+        {
+          title: 'Total Matrículas',
+          value: String(enrollmentsCount || 0),
+          icon: UserPlus,
+          trend: 'Realizadas',
+          color: 'text-primary',
+          bg: 'bg-primary/10',
+        },
+      ])
+
+      const todayClassesList = (classesData || []).map((c: any) => ({
+        time: c.schedule,
+        course: c.name,
+        room: c.description || 'Sala Principal',
+        occupancy: c.enrollments[0]?.count || 0,
+      }))
+      setClassesToday(todayClassesList)
+
+      // Group finances by generic months for demo since dataset is small
+      const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun']
+      const chartData = months.map((month) => ({ month, receitas: 0, despesas: 0 }))
+
+      ;(transactionsData || []).forEach((t: any) => {
+        const date = new Date(t.created_at)
+        const monthIdx = date.getMonth() % 6 // wrap around for demo 6 months
+        if (t.type === 'income' && t.status === 'Pago') {
+          chartData[monthIdx].receitas += Number(t.amount)
+        } else if (t.type === 'expense') {
+          chartData[monthIdx].despesas += Number(t.amount)
+        }
+      })
+
+      // Ensure there's some data if empty to not break the chart visually
+      if (chartData.every((d) => d.receitas === 0)) {
+        chartData[0].receitas = totalRevenue
+      }
+
+      setFinancesChart(chartData)
+    }
+    fetchData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-1">
@@ -52,7 +143,7 @@ export default function Index() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {STATS.map((stat, i) => (
+        {stats.map((stat, i) => (
           <Card
             key={i}
             className="animate-slide-up hover:border-border/80 transition-colors"
@@ -89,10 +180,7 @@ export default function Index() {
               className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={MOCK_FINANCES_CHART}
-                  margin={{ top: 20, right: 0, left: -20, bottom: 0 }}
-                >
+                <BarChart data={financesChart} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -135,7 +223,7 @@ export default function Index() {
           </CardHeader>
           <CardContent className="flex-1">
             <div className="space-y-6">
-              {MOCK_CLASSES_TODAY.map((aula, i) => (
+              {classesToday.map((aula, i) => (
                 <div key={i} className="flex items-center group">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
                     <Clock className="h-5 w-5 text-primary" />
@@ -153,6 +241,11 @@ export default function Index() {
                   </div>
                 </div>
               ))}
+              {classesToday.length === 0 && (
+                <div className="text-center text-muted-foreground py-8">
+                  Nenhuma aula encontrada.
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

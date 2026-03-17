@@ -1,14 +1,39 @@
+import { useEffect, useState } from 'react'
 import { Calendar as CalendarIcon, Users, BookOpen } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MOCK_COURSES, MOCK_CLASSES_TODAY } from '@/lib/mock-data'
 import { Calendar } from '@/components/ui/calendar'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { supabase } from '@/lib/supabase/client'
 
 export default function Classes() {
   const [date, setDate] = useState<Date | undefined>(new Date())
+  const [courses, setCourses] = useState<any[]>([])
+
+  useEffect(() => {
+    async function fetchClasses() {
+      const { data } = (await supabase
+        .from('classes' as any)
+        .select('*, enrollments(count)')
+        .order('created_at', { ascending: true })) as any
+
+      if (data) {
+        setCourses(
+          data.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            instructor: c.teacher_name,
+            students: c.enrollments?.[0]?.count || 0,
+            color: c.color || 'bg-primary/10 text-primary',
+            time: c.schedule,
+            room: c.description || 'Sala Padrão',
+          })),
+        )
+      }
+    }
+    fetchClasses()
+  }, [])
 
   return (
     <div className="space-y-8 animate-slide-up">
@@ -44,7 +69,7 @@ export default function Classes() {
 
         <TabsContent value="cursos" className="mt-8">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {MOCK_COURSES.map((course) => (
+            {courses.map((course) => (
               <Card
                 key={course.id}
                 className="overflow-hidden hover:shadow-md transition-shadow group"
@@ -69,6 +94,11 @@ export default function Classes() {
                 </CardContent>
               </Card>
             ))}
+            {courses.length === 0 && (
+              <div className="col-span-full text-center text-muted-foreground py-8">
+                Nenhum curso encontrado.
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -99,7 +129,7 @@ export default function Classes() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/50">
-                  {MOCK_CLASSES_TODAY.map((aula, i) => (
+                  {courses.map((aula, i) => (
                     <div
                       key={i}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-muted/30 transition-colors"
@@ -109,7 +139,7 @@ export default function Classes() {
                           {aula.time}
                         </div>
                         <div>
-                          <h4 className="font-bold text-lg text-foreground">{aula.course}</h4>
+                          <h4 className="font-bold text-lg text-foreground">{aula.name}</h4>
                           <p className="text-sm font-medium text-muted-foreground mt-0.5 flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-border"></span>
                             {aula.room}
@@ -121,11 +151,16 @@ export default function Classes() {
                           variant="outline"
                           className="bg-background shadow-sm px-3 py-1 text-sm font-medium"
                         >
-                          {aula.occupancy} presenças
+                          {aula.students} presenças
                         </Badge>
                       </div>
                     </div>
                   ))}
+                  {courses.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Nenhuma aula agendada.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
