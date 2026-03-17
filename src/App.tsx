@@ -10,6 +10,7 @@ import Index from './pages/Index'
 import Students from './pages/Students'
 import Classes from './pages/Classes'
 import Finances from './pages/Finances'
+import Users from './pages/Users'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth()
@@ -32,6 +33,7 @@ const AppContent = () => (
       <Route path="/alunos" element={<Students />} />
       <Route path="/turmas" element={<Classes />} />
       <Route path="/financeiro" element={<Finances />} />
+      <Route path="/usuarios" element={<Users />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>

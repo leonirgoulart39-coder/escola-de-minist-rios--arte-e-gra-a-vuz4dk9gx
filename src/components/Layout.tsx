@@ -1,5 +1,15 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Bell, Search, LayoutDashboard, Users, Palette, Wallet, Menu, LogOut } from 'lucide-react'
+import {
+  Bell,
+  Search,
+  LayoutDashboard,
+  Users,
+  Palette,
+  Wallet,
+  Menu,
+  LogOut,
+  UserCog,
+} from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +36,7 @@ const NAV_ITEMS = [
   { title: 'Alunos', url: '/alunos', icon: Users },
   { title: 'Turmas & Cursos', url: '/turmas', icon: Palette },
   { title: 'Financeiro', url: '/financeiro', icon: Wallet },
+  { title: 'Usuários', url: '/usuarios', icon: UserCog },
 ]
 
 function AppSidebar() {
@@ -71,7 +82,7 @@ function AppSidebar() {
 
 function TopHeader() {
   const { toggleSidebar, isMobile } = useSidebar()
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
 
   return (
     <header className="sticky top-0 z-10 flex h-[4.5rem] shrink-0 items-center gap-4 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8">
@@ -105,11 +116,14 @@ function TopHeader() {
             <DropdownMenuTrigger asChild>
               <Avatar className="h-9 w-9 border border-border/50 ring-2 ring-transparent transition-all hover:ring-primary/20 cursor-pointer">
                 <AvatarImage
-                  src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=10"
-                  alt="@admin"
+                  src={
+                    user?.user_metadata?.avatar_url ||
+                    'https://img.usecurling.com/ppl/thumbnail?gender=female&seed=10'
+                  }
+                  alt="@user"
                 />
                 <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  AD
+                  {user?.user_metadata?.full_name?.substring(0, 2)?.toUpperCase() || 'AD'}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>

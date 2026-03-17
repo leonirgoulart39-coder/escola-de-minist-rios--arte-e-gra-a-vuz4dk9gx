@@ -8,24 +8,70 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
 export default function Login() {
-  const { signIn } = useAuth()
+  const { signIn, signUp } = useAuth()
   const { toast } = useToast()
+
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('admin@sintonia.arte')
   const [password, setPassword] = useState('admin123')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    const { error } = await signIn(email, password)
-    if (error) {
+
+    if (isSignUp && password !== confirmPassword) {
       toast({
-        title: 'Erro no login',
-        description: error.message,
+        title: 'Erro de validação',
+        description: 'As senhas não coincidem.',
         variant: 'destructive',
       })
+      return
     }
+
+    setLoading(true)
+
+    if (isSignUp) {
+      const { error } = await signUp(email, password, name)
+      if (error) {
+        toast({
+          title: 'Erro no cadastro',
+          description: error.message,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Conta criada!',
+          description:
+            'Sua conta foi criada com sucesso. Verifique seu email ou faça login se já estiver autenticado.',
+        })
+        setIsSignUp(false)
+      }
+    } else {
+      const { error } = await signIn(email, password)
+      if (error) {
+        toast({
+          title: 'Erro no login',
+          description: error.message,
+          variant: 'destructive',
+        })
+      }
+    }
+
     setLoading(false)
+  }
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp)
+    // Clear fields when toggling to signup to avoid submitting admin credentials
+    if (!isSignUp) {
+      setEmail('')
+      setPassword('')
+    } else {
+      setEmail('admin@sintonia.arte')
+      setPassword('admin123')
+    }
   }
 
   return (
@@ -38,10 +84,27 @@ export default function Login() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Sintonia Arte</CardTitle>
-          <CardDescription>Faça login para acessar o painel de gestão.</CardDescription>
+          <CardDescription>
+            {isSignUp
+              ? 'Crie sua conta para acessar o sistema.'
+              : 'Faça login para acessar o painel de gestão.'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <div className="space-y-2 animate-fade-in">
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Seu nome"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required={isSignUp}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -63,10 +126,33 @@ export default function Login() {
                 required
               />
             </div>
+            {isSignUp && (
+              <div className="space-y-2 animate-fade-in">
+                <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required={isSignUp}
+                />
+              </div>
+            )}
             <Button type="submit" className="w-full mt-2" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Entrar
+              {isSignUp ? 'Cadastrar' : 'Entrar'}
             </Button>
+
+            <div className="text-center mt-4">
+              <Button
+                variant="link"
+                type="button"
+                className="text-sm text-muted-foreground hover:text-primary p-0 h-auto font-normal"
+                onClick={toggleMode}
+              >
+                {isSignUp ? 'Já tem uma conta? Faça login' : 'Não tem uma conta? Cadastre-se'}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
