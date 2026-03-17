@@ -91,11 +91,53 @@ export const MOCK_FINANCES_PIE = [
 ]
 
 export const MOCK_INVOICES = [
-  { id: 'INV-001', student: 'Ana Clara', amount: 350, status: 'Pago', date: '01/10/2023' },
-  { id: 'INV-002', student: 'João Silva', amount: 450, status: 'Atrasado', date: '28/09/2023' },
-  { id: 'INV-003', student: 'Marina Costa', amount: 300, status: 'Pendente', date: '05/10/2023' },
-  { id: 'INV-004', student: 'Pedro Alves', amount: 300, status: 'Pago', date: '02/10/2023' },
-  { id: 'INV-005', student: 'Beatriz Lima', amount: 400, status: 'Pago', date: '01/10/2023' },
+  {
+    id: 'INV-001',
+    student: 'Ana Clara',
+    amount: 350,
+    status: 'Pago',
+    paymentMethod: 'PIX',
+    date: '01/10/2023',
+  },
+  {
+    id: 'INV-002',
+    student: 'João Silva',
+    amount: 450,
+    status: 'Cancelado',
+    paymentMethod: 'Boleto',
+    date: '28/09/2023',
+  },
+  {
+    id: 'INV-003',
+    student: 'Marina Costa',
+    amount: 300,
+    status: 'Pendente',
+    paymentMethod: 'Cartão',
+    date: '05/10/2023',
+  },
+  {
+    id: 'INV-004',
+    student: 'Pedro Alves',
+    amount: 300,
+    status: 'Pago',
+    paymentMethod: 'PIX',
+    date: '02/10/2023',
+  },
+  {
+    id: 'INV-005',
+    student: 'Beatriz Lima',
+    amount: 400,
+    status: 'Pago',
+    paymentMethod: 'Cartão',
+    date: '01/10/2023',
+  },
+]
+
+export const MOCK_CASH_FLOW_BY_CLASS = [
+  { class: 'Pintura', paid: 4500, pending: 1200, cancelled: 300 },
+  { class: 'Arte Digital', paid: 6200, pending: 800, cancelled: 0 },
+  { class: 'Escultura', paid: 2100, pending: 2100, cancelled: 700 },
+  { class: 'Aquarela', paid: 3800, pending: 500, cancelled: 150 },
 ]
 
 export const MOCK_GALLERY = [
