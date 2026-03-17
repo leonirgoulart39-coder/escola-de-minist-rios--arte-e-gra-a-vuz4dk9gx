@@ -49,6 +49,7 @@ import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
 import { TransactionFormModal } from '@/components/finances/TransactionFormModal'
 import { InstallmentFormModal } from '@/components/finances/InstallmentFormModal'
+import { ClassCashFlowTable } from '@/components/finances/ClassCashFlowTable'
 
 export default function Finances() {
   const { toast } = useToast()
@@ -59,6 +60,7 @@ export default function Finances() {
   const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isInstallmentFormOpen, setIsInstallmentFormOpen] = useState(false)
+  const [refreshCounter, setRefreshCounter] = useState(0)
 
   const fetchFinances = async () => {
     setLoading(true)
@@ -122,6 +124,7 @@ export default function Finances() {
         })),
       )
     }
+    setRefreshCounter((c) => c + 1)
     setLoading(false)
   }
 
@@ -376,6 +379,8 @@ export default function Finances() {
           </CardContent>
         </Card>
       </div>
+
+      <ClassCashFlowTable refreshTrigger={refreshCounter} />
 
       <Card>
         <CardHeader>
