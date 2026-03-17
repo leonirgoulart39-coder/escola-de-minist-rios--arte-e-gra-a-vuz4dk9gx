@@ -15,7 +15,7 @@ export default function Login() {
 
   const [isSignUp, setIsSignUp] = useState(false)
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('admin@sintonia.arte')
+  const [email, setEmail] = useState('admin@arteegraca.com')
   const [password, setPassword] = useState('admin123')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -92,7 +92,7 @@ export default function Login() {
       setEmail('')
       setPassword('')
     } else {
-      setEmail('admin@sintonia.arte')
+      setEmail('admin@arteegraca.com')
       setPassword('admin123')
     }
   }
@@ -106,7 +106,7 @@ export default function Login() {
               <Palette className="size-6" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Sintonia Arte</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">Arte e Graça</CardTitle>
           <CardDescription>
             {isSignUp
               ? 'Crie sua conta para acessar o sistema.'
@@ -133,7 +133,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@sintonia.arte"
+                placeholder="admin@arteegraca.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

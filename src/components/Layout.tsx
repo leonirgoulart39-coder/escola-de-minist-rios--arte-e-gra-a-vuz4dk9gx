@@ -50,7 +50,7 @@ function AppSidebar() {
             <Palette className="size-5" />
           </div>
           <span className="font-bold text-xl tracking-tight text-sidebar-foreground">
-            Sintonia Arte
+            Arte e Graça
           </span>
         </div>
       </SidebarHeader>

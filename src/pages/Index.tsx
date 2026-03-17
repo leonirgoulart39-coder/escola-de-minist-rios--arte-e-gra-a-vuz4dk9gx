@@ -136,7 +136,7 @@ export default function Index() {
           Visão Geral
         </h1>
         <p className="text-muted-foreground text-lg">
-          Bem-vindo ao Sintonia Arte. Aqui está o resumo de hoje.
+          Bem-vindo ao Arte e Graça. Aqui está o resumo de hoje.
         </p>
       </div>
 
