@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { Palette, Loader2 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +15,7 @@ export default function Login() {
 
   const [isSignUp, setIsSignUp] = useState(false)
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('admin@arteegraca.com')
+  const [email, setEmail] = useState('admin@escola.com')
   const [password, setPassword] = useState('admin123')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -87,12 +87,11 @@ export default function Login() {
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp)
-    // Clear fields when toggling to signup to avoid submitting admin credentials
     if (!isSignUp) {
       setEmail('')
       setPassword('')
     } else {
-      setEmail('admin@arteegraca.com')
+      setEmail('admin@escola.com')
       setPassword('admin123')
     }
   }
@@ -100,14 +99,19 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/20 p-4">
       <Card className="w-full max-w-sm animate-fade-in-up">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <div className="flex justify-center mb-2">
-            <div className="flex aspect-square size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <Palette className="size-6" />
-            </div>
+        <CardHeader className="space-y-4 text-center pb-6">
+          <div className="flex justify-center mb-2 mt-4">
+            <img
+              src="/logo.png"
+              alt="Logo da Escola"
+              className="h-20 w-auto object-contain drop-shadow-sm"
+              onError={(e) => {
+                e.currentTarget.src =
+                  'https://img.usecurling.com/i?q=brand&shape=fill&color=solid-black'
+              }}
+            />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Arte e Graça</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base font-medium">
             {isSignUp
               ? 'Crie sua conta para acessar o sistema.'
               : 'Faça login para acessar o painel de gestão.'}
@@ -133,7 +137,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@arteegraca.com"
+                placeholder="admin@escola.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

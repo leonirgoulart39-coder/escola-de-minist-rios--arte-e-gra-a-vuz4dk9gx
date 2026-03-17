@@ -9,6 +9,7 @@ import {
   Menu,
   LogOut,
   UserCog,
+  ChevronDown,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -20,7 +21,6 @@ import {
   SidebarProvider,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,14 +44,17 @@ function AppSidebar() {
 
   return (
     <Sidebar variant="inset" className="border-r border-border/40">
-      <SidebarHeader className="p-5">
-        <div className="flex items-center gap-3 px-1">
-          <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-            <Palette className="size-5" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-sidebar-foreground">
-            Arte e Graça
-          </span>
+      <SidebarHeader className="p-6">
+        <div className="flex items-center justify-center w-full overflow-hidden">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-10 w-auto object-contain transition-all group-data-[collapsible=icon]:h-6 drop-shadow-sm"
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://img.usecurling.com/i?q=brand&shape=fill&color=solid-black'
+            }}
+          />
         </div>
       </SidebarHeader>
       <SidebarContent className="p-3">
@@ -114,21 +117,18 @@ function TopHeader() {
           <div className="h-8 w-px bg-border/50 hidden sm:block"></div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="h-9 w-9 border border-border/50 ring-2 ring-transparent transition-all hover:ring-primary/20 cursor-pointer">
-                <AvatarImage
-                  src={
-                    user?.user_metadata?.avatar_url ||
-                    'https://img.usecurling.com/ppl/thumbnail?gender=female&seed=10'
-                  }
-                  alt="@user"
-                />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {user?.user_metadata?.full_name?.substring(0, 2)?.toUpperCase() || 'AD'}
-                </AvatarFallback>
-              </Avatar>
+              <Button
+                variant="ghost"
+                className="relative flex items-center gap-2 rounded-full pl-3 pr-2 py-1.5 h-10 border border-border/50 hover:bg-muted/60 transition-colors"
+              >
+                <span className="font-medium text-sm max-w-[140px] truncate text-foreground/80">
+                  {user?.user_metadata?.full_name || 'Administrador'}
+                </span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+              </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
+            <DropdownMenuContent align="end" className="w-48 mt-1">
+              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer py-2">
                 <LogOut className="mr-2 h-4 w-4" />
                 Sair
               </DropdownMenuItem>
