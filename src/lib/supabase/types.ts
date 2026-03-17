@@ -79,18 +79,21 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          email: string | null
           full_name: string | null
           id: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
         }
@@ -348,6 +351,7 @@ export const Constants = {
 //   full_name: text (nullable)
 //   avatar_url: text (nullable)
 //   created_at: timestamp with time zone (nullable, default: now())
+//   email: text (nullable)
 // Table: students
 //   id: uuid (not null, default: gen_random_uuid())
 //   name: text (not null)
@@ -412,6 +416,26 @@ export const Constants = {
 //   Policy "Allow authenticated full access to transactions" (ALL, PERMISSIVE) roles={authenticated}
 //     USING: true
 //     WITH CHECK: true
+
+// --- DATABASE FUNCTIONS ---
+// FUNCTION handle_new_user()
+//   CREATE OR REPLACE FUNCTION public.handle_new_user()
+//    RETURNS trigger
+//    LANGUAGE plpgsql
+//    SECURITY DEFINER
+//   AS $function$
+//   BEGIN
+//     INSERT INTO public.profiles (id, full_name, email, avatar_url)
+//     VALUES (
+//       NEW.id,
+//       COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', 'Usuário Novo'),
+//       NEW.email,
+//       COALESCE(NEW.raw_user_meta_data->>'avatar_url', '')
+//     );
+//     RETURN NEW;
+//   END;
+//   $function$
+//
 
 // --- INDEXES ---
 // Table: enrollments
